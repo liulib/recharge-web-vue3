@@ -2,7 +2,9 @@ import { isNavigationFailure, Router } from 'vue-router';
 import store from '@/store';
 import NProgress from 'nprogress'; // progress bar
 
-import { whiteList } from '@/configs/base_config';
+import { storage } from '@/utils/Storage';
+import { whiteList } from '@/configs/base-config';
+import { ACCESS_TOKEN } from '@/store/mutation-types';
 
 NProgress.configure({ showSpinner: false }); // NProgress Configuration
 
@@ -12,8 +14,7 @@ const defaultRoutePath = '/dashboard';
 export function createRouterGuards(router: Router) {
     router.beforeEach((to, from, next) => {
         NProgress.start(); // start progress bar
-        // const token = storage.get(ACCESS_TOKEN);
-        const token = null;
+        const token = storage.get('cacheData');
         if (token) {
             if (to.name === 'login') {
                 next({ path: defaultRoutePath });

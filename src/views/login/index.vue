@@ -17,7 +17,7 @@
             >
             </a-input>
             <div class="rememberCheck">
-                <a-checkbox v-model:value="rememberFlag">
+                <a-checkbox v-model:checked="rememberFlag">
                     <span>记住密码</span>
                 </a-checkbox>
             </div>
@@ -44,7 +44,11 @@
 
 <script lang="ts">
 import { defineComponent, reactive, toRefs } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import { useStore } from '@/store';
+
 import { message } from 'ant-design-vue';
+import { UserActionTypes } from '@/store/actions';
 
 export default defineComponent({
     setup() {
@@ -56,11 +60,37 @@ export default defineComponent({
                 password: ''
             }
         });
-        const handleSubmit = () => {
+
+        const router = useRouter();
+        const route = useRoute();
+        const store = useStore();
+
+        const handleSubmit = async () => {
             const { username, password } = state.reqParams;
             if (username.trim() == '' || password.trim() == '')
                 return message.warning('用户名或密码不能为空！');
+
             state.loading = true;
+
+            const { code, message: msg } = await store
+                .dispatch(UserActionTypes.Login, state.reqParams)
+                .finally(() => {
+                    state.loading = false;
+                });
+
+            if (code == 1) {
+                const toPath = decodeURIComponent(
+                    (route.query?.redirect || '/') as string
+                );
+                message.success('登录成功！');
+                router.replace(toPath).then(_ => {
+                    if (route.name == 'login') {
+                        router.replace('/');
+                    }
+                });
+            } else {
+                message.error(msg || '登录失败');
+            }
         };
         return { ...toRefs(state), handleSubmit };
     }

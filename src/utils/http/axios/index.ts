@@ -1,51 +1,22 @@
 // axios配置  可自行根据项目进行更改，只需更改该文件即可，其他文件可以不动
 
+import { VAxios } from './Axios';
+import { AxiosTransform } from './axiosTransform';
 import axios, { AxiosResponse } from 'axios';
 import qs from 'qs';
-import { Modal, message as Message } from 'ant-design-vue';
-import router from '@/router';
-
 import { checkStatus } from './checkStatus';
-import { AxiosTransform } from './axiosTransform';
-import { RequestOptions, Result } from './types';
+import { Modal, message as Message } from 'ant-design-vue';
+import { RequestEnum, ResultEnum, ContentTypeEnum } from '@/enums/httpEnum';
 
 import { isString } from '@/utils/is/index';
-// import { setObjToUrlParams } from '@/utils/urlUtils';
+import { setObjToUrlParams } from '@/utils/urlUtils';
+
+import { RequestOptions, Result } from './types';
 
 const isDev = process.env.NODE_ENV === 'development';
-
-const enum ResultEnum {
-    SUCCESS = 0,
-    ERROR = -1,
-    TIMEOUT = 10042,
-    TYPE = 'success'
-}
-
-/**
- * @description: 请求方法
- */
-const enum RequestEnum {
-    GET = 'GET',
-    POST = 'POST',
-    PATCH = 'PATCH',
-    PUT = 'PUT',
-    DELETE = 'DELETE'
-}
-
-/**
- * @description:  常用的contentTyp类型
- */
-const enum ContentTypeEnum {
-    // json
-    JSON = 'application/json;charset=UTF-8',
-    // json
-    TEXT = 'text/plain;charset=UTF-8',
-    // form-data 一般配合qs
-    FORM_URLENCODED = 'application/x-www-form-urlencoded;charset=UTF-8',
-    // form-data  上传
-    FORM_DATA = 'multipart/form-data;charset=UTF-8'
-}
-
+import router from '@/router';
+import store from '@/store';
+import { storage } from '@/utils/Storage';
 /**
  * @description: 数据处理，方便区分多种处理方式
  * axios封装使用了https://github.com/anncwb/vue-vben-admin/tree/main/src/utils/http/axios
@@ -69,11 +40,11 @@ const transform: AxiosTransform = {
 
         const reject = Promise.reject;
 
-        const { data } = res;
-        //  这里 code，result，message为 后台统一的字段，需要在 types.ts内修改为项目自己的接口返回格式
-        const { code, result, message } = data;
+        const result = res.data;
+
+        const { code, data, message } = result;
         // 请求成功
-        const hasSuccess = data && Reflect.has(data, 'code');
+        const hasSuccess = code === ResultEnum.SUCCESS;
         // 是否显示提示信息
         if (isShowMessage) {
             if (hasSuccess && (successMessageText || isShowSuccessMessage)) {
@@ -141,9 +112,9 @@ const transform: AxiosTransform = {
         // }
 
         // 这里逻辑可以根据项目进行修改
-        // if (!hasSuccess) {
-        //     return reject(new Error(message));
-        // }
+        if (!hasSuccess) {
+            return reject(new Error(message));
+        }
 
         return data;
     },
@@ -158,9 +129,11 @@ const transform: AxiosTransform = {
             isParseToJson
         } = options;
 
-        config.url = isDev
-            ? `/api${config.url}`
-            : `${apiUrl || ''}${config.url}`;
+        console.log(apiUrl);
+
+        config.url = apiUrl ? apiUrl + config.url : config.url;
+
+        console.log(config.url);
 
         if (config.method === RequestEnum.GET) {
             const now = new Date().getTime();
@@ -207,15 +180,15 @@ const transform: AxiosTransform = {
     /**
      * @description: 请求拦截器处理
      */
-    requestInterceptors: config => {
-        // 请求之前处理config
-        // const token = store.state.user.token;
-        // if (token) {
-        //     // jwt token
-        //     config.headers.token = token;
-        // }
-        return config;
-    },
+    // requestInterceptors: config => {
+    //     // 请求之前处理config
+    //     const token = store.state.user.token;
+    //     if (token) {
+    //         // jwt token
+    //         config.headers.token = token;
+    //     }
+    //     return config;
+    // },
 
     /**
      * @description: 响应错误处理
@@ -267,7 +240,7 @@ const Axios = new VAxios({
         // 默认将prefix 添加到url
         joinPrefix: true,
         // 需要对返回数据进行处理
-        isTransformRequestResult: true,
+        isTransformRequestResult: false,
         // post请求的时候添加参数到url
         joinParamsToUrl: false,
         // 格式化提交参数时间
