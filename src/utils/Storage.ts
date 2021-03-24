@@ -56,10 +56,19 @@ export const createStorage = ({
                     const { value, expire } = data;
 
                     // 在有效期内直接返回
-                    if (expire === null || expire >= Date.now()) {
-                        return value;
+                    if (
+                        expire === undefined ||
+                        expire === null ||
+                        expire >= Date.now()
+                    ) {
+                        if (value === undefined) {
+                            return data;
+                        } else {
+                            return value;
+                        }
+                    } else {
+                        this.remove(this.getKey(key));
                     }
-                    // this.remove(this.getKey(key));
                 } catch (e) {
                     return def;
                 }

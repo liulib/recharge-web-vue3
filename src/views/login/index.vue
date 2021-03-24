@@ -1,36 +1,39 @@
 <template>
     <div class="loginBox">
         <h1 class="logo">LOGO</h1>
-        <div class="formBox">
-            <a-input
-                class="loginInput"
-                v-model:value="reqParams.username"
-                placeholder="请输入用户名"
-            >
-            </a-input>
-            <a-input
-                class="loginInput"
-                v-model:value="reqParams.password"
-                type="password"
-                autocomplete="new-password"
-                placeholder="请输入密码"
-            >
-            </a-input>
-            <div class="rememberCheck">
+        <a-form class="formBox" :wrapper-col="wrapperCol" :model="modelRef">
+            <a-form-item v-bind="validateInfos.username">
+                <a-input
+                    v-model:value="modelRef.username"
+                    placeholder="Username"
+                >
+                </a-input>
+            </a-form-item>
+            <a-form-item v-bind="validateInfos.password">
+                <a-input
+                    v-model:value="modelRef.password"
+                    type="password"
+                    placeholder="Password"
+                >
+                </a-input>
+            </a-form-item>
+            <a-form-item class="rememberCheck">
                 <a-checkbox v-model:checked="rememberFlag">
                     <span>记住密码</span>
-                </a-checkbox>
-            </div>
-            <a-button
-                class="loginButton"
-                type="primary"
-                html-type="submit"
-                :loading="loading"
-                @click.prevent="handleSubmit"
+                </a-checkbox></a-form-item
             >
-                登录
-            </a-button>
-        </div>
+            <a-form-item>
+                <a-button
+                    block
+                    type="primary"
+                    html-type="submit"
+                    :loading="loading"
+                    @click="handleSubmit"
+                >
+                    登 录
+                </a-button>
+            </a-form-item>
+        </a-form>
         <div class="rightsInfo">
             <p>
                 &copy;2021 湖南春风科技. All Rights Reserved.<a
@@ -44,55 +47,100 @@
 
 <script lang="ts">
 import { defineComponent, reactive, toRefs } from 'vue';
+import { useForm } from '@ant-design-vue/use';
 import { useRoute, useRouter } from 'vue-router';
 import { useStore } from '@/store';
-
 import { message } from 'ant-design-vue';
 import { UserActionTypes } from '@/store/actions';
 
+import { checkUsername, checkPassword } from './validate';
+import { ReqParams } from './types';
+import { storage } from '@/utils/Storage';
+
 export default defineComponent({
     setup() {
-        const state = reactive({
-            loading: false,
-            rememberFlag: false,
-            reqParams: {
-                username: '',
-                password: ''
-            }
-        });
-
         const router = useRouter();
         const route = useRoute();
         const store = useStore();
 
-        const handleSubmit = async () => {
-            const { username, password } = state.reqParams;
-            if (username.trim() == '' || password.trim() == '')
-                return message.warning('用户名或密码不能为空！');
+        // 获取localStorage中的登录信息
+        const cacheData: ReqParams = storage.get('loginInfo');
 
-            state.loading = true;
-
-            const { code, message: msg } = await store
-                .dispatch(UserActionTypes.Login, state.reqParams)
-                .finally(() => {
-                    state.loading = false;
-                });
-
-            if (code == 1) {
-                const toPath = decodeURIComponent(
-                    (route.query?.redirect || '/') as string
-                );
-                message.success('登录成功！');
-                router.replace(toPath).then(_ => {
-                    if (route.name == 'login') {
-                        router.replace('/');
+        const state = reactive({
+            loading: false,
+            rememberFlag: cacheData ? true : false,
+            modelRef: cacheData ? cacheData : { username: '', password: '' },
+            rulesRef: {
+                username: [
+                    {
+                        validator: checkUsername,
+                        trigger: 'blur'
                     }
-                });
-            } else {
-                message.error(msg || '登录失败');
+                ],
+                password: [
+                    {
+                        validator: checkPassword,
+                        trigger: 'blur'
+                    }
+                ]
             }
+        });
+
+        const { validate, validateInfos } = useForm(
+            state.modelRef,
+            state.rulesRef
+        );
+
+        /**
+         * @description: 点击登录事件
+         */
+        const handleSubmit = () => {
+            validate()
+                .then(async () => {
+                    // 开启按钮加载动画
+                    state.loading = true;
+                    // 发送action
+                    const { code, message: msg } = await store
+                        .dispatch(UserActionTypes.Login, state.modelRef)
+                        .finally(() => {
+                            // 请求完毕关闭加载动画
+                            state.loading = false;
+                        });
+                    // 判断登录结果
+                    if (code == 1) {
+                        message.success('登录成功！');
+
+                        // 如果需要记住密码则将信息存储到localStorage
+                        // TODO:改成加密存储
+                        if (state.rememberFlag) {
+                            storage.set('loginInfo', state.modelRef);
+                        }
+
+                        // 如果是重定向过来的则跳回到之前的页面
+                        const toPath = decodeURIComponent(
+                            (route.query?.redirect || '/') as string
+                        );
+
+                        router.replace(toPath).then(_ => {
+                            if (route.name == 'login') {
+                                router.replace('/');
+                            }
+                        });
+                    } else {
+                        message.error(msg || '登录失败');
+                    }
+                })
+                .catch(err => {
+                    message.error(err);
+                });
         };
-        return { ...toRefs(state), handleSubmit };
+
+        return {
+            wrapperCol: { span: 24 },
+            ...toRefs(state),
+            handleSubmit,
+            validateInfos
+        };
     }
 });
 </script>
@@ -112,9 +160,6 @@ export default defineComponent({
     }
     .formBox {
         width: 300px;
-        .loginInput {
-            margin-bottom: 10px;
-        }
         .rememberCheck {
             text-align: right;
             margin-bottom: 10px;

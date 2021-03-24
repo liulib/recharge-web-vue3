@@ -1,6 +1,6 @@
 import { RouteRecordRaw } from 'vue-router';
 
-const routeName = 'error';
+const routeName = 'notFound';
 
 const routes: Array<RouteRecordRaw> = [
     {

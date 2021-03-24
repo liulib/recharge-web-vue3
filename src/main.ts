@@ -4,6 +4,8 @@ import router, { setupRouter } from './router';
 import { setupStore } from './store';
 import { setupAntd } from '@/plugins';
 
+import 'nprogress/css/nprogress.css'; // 进度条样式
+
 const app = createApp(App);
 
 // 注册全局常用的ant-design-vue组件

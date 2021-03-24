@@ -6,15 +6,17 @@ import { storage } from '@/utils/Storage';
 import { whiteList } from '@/configs/base-config';
 import { ACCESS_TOKEN } from '@/store/mutation-types';
 
-NProgress.configure({ showSpinner: false }); // NProgress Configuration
-
 const loginRoutePath = '/login';
 const defaultRoutePath = '/dashboard';
 
 export function createRouterGuards(router: Router) {
     router.beforeEach((to, from, next) => {
-        NProgress.start(); // start progress bar
-        const token = storage.get('cacheData');
+        NProgress.start();
+        // 获取localStorage中的数据
+        const token = storage.get('cacheData')
+            ? storage.get('cacheData')[ACCESS_TOKEN]
+            : null;
+        // 存在token 则直接跳转页面
         if (token) {
             if (to.name === 'login') {
                 next({ path: defaultRoutePath });
@@ -23,18 +25,18 @@ export function createRouterGuards(router: Router) {
                 next();
             }
         } else {
-            console.log(to.name);
-            // not login
+            // 未登录
             if (whiteList.includes(to.name as string)) {
                 // 在免登录名单，直接进入
                 next();
             } else {
+                // 跳转到登录页并带上跳转前的路径
                 next({
                     path: loginRoutePath,
                     query: { redirect: to.fullPath },
                     replace: true
                 });
-                NProgress.done(); // if current page is login will not trigger afterEach hook, so manually handle it
+                NProgress.done();
             }
         }
     });
@@ -44,7 +46,7 @@ export function createRouterGuards(router: Router) {
         if (isNavigationFailure(failure)) {
             console.log('failed navigation', failure);
         }
-        NProgress.done(); // finish progress bar
+        NProgress.done();
     });
 
     router.onError(error => {
