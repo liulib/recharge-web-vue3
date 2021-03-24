@@ -7,6 +7,11 @@ import mutations from './mutations';
 import actions from './actions';
 
 import createPersistedState from './plugins/SavaInSS';
+import { State } from './state';
+
+interface RootState {
+    baseState: State;
+}
 
 const store = createStore({
     state,

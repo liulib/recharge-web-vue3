@@ -9,7 +9,10 @@ import {
     Card,
     Checkbox,
     Radio,
-    Button
+    Button,
+    Layout,
+    Tabs,
+    Dropdown
 } from 'ant-design-vue';
 
 import 'ant-design-vue/dist/antd.css';
@@ -23,5 +26,8 @@ export function setupAntd(app: App<Element>) {
         .use(Card)
         .use(Checkbox)
         .use(Radio)
-        .use(Button);
+        .use(Button)
+        .use(Layout)
+        .use(Dropdown)
+        .use(Tabs);
 }

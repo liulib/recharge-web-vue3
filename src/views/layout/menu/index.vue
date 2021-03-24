@@ -1,12 +1,12 @@
 <template>
-    <a-layout-header class="layoutHeader">资产管理系统</a-layout-header>
+    <div class="test">菜单</div>
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue';
 
 export default defineComponent({
-    name: 'LayoutHeader',
+    name: 'LayoutMenu',
     setup() {
         return {};
     }
@@ -14,7 +14,7 @@ export default defineComponent({
 </script>
 
 <style lang="less" scoped>
-.layoutHeader {
-    background-color: #fff;
+.test {
+    background-color: red;
 }
 </style>

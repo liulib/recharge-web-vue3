@@ -4,6 +4,8 @@ import router, { setupRouter } from './router';
 import { setupStore } from './store';
 import { setupAntd } from '@/plugins';
 
+import '@/assets/styles/reset.css';
+
 import 'nprogress/css/nprogress.css'; // 进度条样式
 
 const app = createApp(App);
