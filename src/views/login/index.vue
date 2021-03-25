@@ -51,10 +51,10 @@ import { useForm } from '@ant-design-vue/use';
 import { useRoute, useRouter } from 'vue-router';
 import { useStore } from '@/store';
 import { message } from 'ant-design-vue';
-import { UserActionTypes } from '@/store/actions';
+import { UserActionTypes } from '@/store/modules/user/action-types';
 
 import { checkUsername, checkPassword } from './validate';
-import { ReqParams } from './types';
+import { LoginReq } from '@/apis/user/types';
 import { storage } from '@/utils/Storage';
 
 export default defineComponent({
@@ -64,12 +64,14 @@ export default defineComponent({
         const store = useStore();
 
         // 获取localStorage中的登录信息
-        const cacheData: ReqParams = storage.get('loginInfo');
+        const cacheData: LoginReq = storage.get('loginInfo');
 
         const state = reactive({
             loading: false,
             rememberFlag: cacheData ? true : false,
-            modelRef: cacheData ? cacheData : { username: '', password: '' },
+            modelRef: cacheData
+                ? cacheData
+                : { username: 'liulib', password: '11111111' },
             rulesRef: {
                 username: [
                     {
@@ -100,14 +102,13 @@ export default defineComponent({
                     // 开启按钮加载动画
                     state.loading = true;
                     // 发送action
-                    const { code, message: msg } = await store
-                        .dispatch(UserActionTypes.Login, state.modelRef)
-                        .finally(() => {
-                            // 请求完毕关闭加载动画
-                            state.loading = false;
-                        });
-                    // 判断登录结果
-                    if (code == 1) {
+                    try {
+                        await store
+                            .dispatch(UserActionTypes.Login, state.modelRef)
+                            .finally(() => {
+                                // 请求完毕关闭加载动画
+                                state.loading = false;
+                            });
                         message.success('登录成功！');
 
                         // 如果需要记住密码则将信息存储到localStorage
@@ -126,8 +127,8 @@ export default defineComponent({
                                 router.replace('/');
                             }
                         });
-                    } else {
-                        message.error(msg || '登录失败');
+                    } catch (error) {
+                        message.error(error.message);
                     }
                 })
                 .catch(err => {

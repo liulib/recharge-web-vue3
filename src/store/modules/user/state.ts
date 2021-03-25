@@ -1,6 +1,5 @@
-import { createStorage } from '@/utils/Storage';
-import { ACCESS_TOKEN } from '@/store/mutation-types';
-const Storage = createStorage({ storage: localStorage });
+import { TOKEN, TAB_LIST } from '@/store/types';
+import { storage } from '@/utils/Storage';
 
 export interface Tab {
     title: string;
@@ -8,14 +7,14 @@ export interface Tab {
     name: string;
 }
 
-export interface State {
+export interface UserState {
     token: string;
     tabList: Tab[];
 }
 
-const state: State = {
-    token: '',
-    tabList: [
+const state: UserState = {
+    token: storage.get(TOKEN) || '',
+    tabList: storage.get(TAB_LIST) || [
         { title: '首页1', path: '/home', name: 'Home' },
         { title: '首页2', path: '/home', name: 'Home' },
         { title: '首页3', path: '/home', name: 'Home' },

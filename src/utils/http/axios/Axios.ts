@@ -145,7 +145,7 @@ export class VAxios {
     /**
      * @description:   请求方法
      */
-    request<T = any>(
+    request<T = Result>(
         config: AxiosRequestConfig,
         options?: RequestOptions
     ): Promise<T> {

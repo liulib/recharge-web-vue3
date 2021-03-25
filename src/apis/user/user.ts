@@ -1,5 +1,5 @@
 import http from '@/utils/http/axios';
-import { LoginParams } from './types';
+import { LoginReq, LoginRes } from './types';
 
 enum Api {
     login = '/auth/login',
@@ -13,10 +13,13 @@ enum Api {
 /**
  * @description: 用户登录
  */
-export function login(params: LoginParams) {
-    return http.request({
-        url: Api.login,
-        method: 'POST',
-        params
-    });
+export function login(params: LoginReq) {
+    return http.request<LoginRes>(
+        {
+            url: Api.login,
+            method: 'POST',
+            params
+        },
+        { isTransformRequestResult: true }
+    );
 }

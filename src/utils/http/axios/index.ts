@@ -61,32 +61,31 @@ const transform: AxiosTransform = {
                 Modal.confirm({ title: '错误提示', content: message });
             }
         }
+
         // 不进行任何处理，直接返回
         // 用于页面代码可能需要直接获取code，data，message这些信息时开启
         if (!isTransformRequestResult) {
-            return res.data;
+            return result;
         }
 
-        if (!data) {
-            // return '[HTTP] Request has no return value';
-            return reject(data);
-        }
+        // if (!data) {
+        //     // return '[HTTP] Request has no return value';
+        //     return reject(data);
+        // }
 
         // 接口请求成功，直接返回结果
         if (code === ResultEnum.SUCCESS) {
-            return result;
+            return data;
         }
+
         // 接口请求错误，统一提示错误信息
         if (code === ResultEnum.ERROR) {
             if (message) {
-                Message.error(data.message);
-                Promise.reject(new Error(message));
+                return Promise.reject(new Error(message));
             } else {
                 const msg = '操作失败,系统异常!';
-                Message.error(msg);
-                Promise.reject(new Error(msg));
+                return Promise.reject(new Error(msg));
             }
-            return reject();
         }
 
         // 登录超时
@@ -240,7 +239,7 @@ const Axios = new VAxios({
         // 默认将prefix 添加到url
         joinPrefix: true,
         // 需要对返回数据进行处理
-        isTransformRequestResult: false,
+        isTransformRequestResult: true,
         // post请求的时候添加参数到url
         joinParamsToUrl: false,
         // 格式化提交参数时间

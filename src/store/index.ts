@@ -1,25 +1,19 @@
 import { createStore } from 'vuex';
 import { App } from 'vue';
+// import createPersistedState from './plugins/SavaInSS';
 
-import state from './state';
-import getters from './getters';
-import mutations from './mutations';
-import actions from './actions';
+import { UserState } from './modules/user/state';
+import { store as user, UserStore } from './modules/user';
 
-import createPersistedState from './plugins/SavaInSS';
-import { State } from './state';
-
-interface RootState {
-    baseState: State;
+export interface RootState {
+    user: UserState;
 }
 
+export type Store = UserStore<Pick<RootState, 'user'>>;
+
 const store = createStore({
-    state,
-    getters,
-    mutations,
-    actions,
-    modules: {},
-    plugins: [createPersistedState]
+    modules: { user }
+    // plugins: [createPersistedState]
 });
 
 export function setupStore(app: App) {
@@ -28,7 +22,7 @@ export function setupStore(app: App) {
 
 // 定义你自己的“useStore”组合函数
 export function useStore() {
-    return store;
+    return store as Store;
 }
 
 export default store;

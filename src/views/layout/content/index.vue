@@ -7,9 +7,11 @@
             @change="changeTabs"
             hideAdd
         >
-            <a-tab-pane key="1" tab="Tab 1"></a-tab-pane>
-            <a-tab-pane key="2" tab="Tab 2"></a-tab-pane>
-            <a-tab-pane key="3" tab="Tab 3"></a-tab-pane>
+            <a-tab-pane
+                v-for="item in tabsList"
+                :key="item.menuName"
+                :tab="item.menuName"
+            ></a-tab-pane>
 
             <template v-slot:tabBarExtraContent>
                 <a-dropdown>
@@ -56,9 +58,14 @@ export default defineComponent({
         const route = useRoute();
         const store = useStore();
 
-        const tabsList = computed(() => store.state);
+        const tabsList = computed(() => {
+            return store.state.user.tabList;
+        });
 
-        console.log(tabsList);
+        // console.log(tabsList);
+        // tabsList.value.forEach(item => {
+        //     console.log(item);
+        // });
 
         const editTabs = value => console.log(value);
         const changeTabs = value => console.log(value);
@@ -70,7 +77,8 @@ export default defineComponent({
             changeTabs,
             reloadPage,
             removeTab,
-            route
+            route,
+            tabsList
         };
     }
 });
