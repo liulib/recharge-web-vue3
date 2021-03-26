@@ -1,26 +1,30 @@
-import { TOKEN, TAB_LIST } from '@/store/types';
+import { TOKEN, MENU_LIST } from '@/store/types';
 import { storage } from '@/utils/Storage';
 
-export interface Tab {
-    title: string;
-    path: string;
-    name: string;
+export interface Menu {
+    id: number;
+    parentId: number;
+    menuName: string;
+    menuType: number;
+    status: number;
+    url: string;
+    perms: string;
+    remark: null | string;
+    isDelete: number;
+    createdAt: string;
+    updatedAt: string;
+    level: number;
+    children?: object;
 }
 
 export interface UserState {
     token: string;
-    tabList: Tab[];
+    menuList: Menu[];
 }
 
 const state: UserState = {
     token: storage.get(TOKEN) || '',
-    tabList: storage.get(TAB_LIST) || [
-        { title: '首页1', path: '/home', name: 'Home' },
-        { title: '首页2', path: '/home', name: 'Home' },
-        { title: '首页3', path: '/home', name: 'Home' },
-        { title: '首页4', path: '/home', name: 'Home' },
-        { title: '首页5', path: '/home', name: 'Home' }
-    ]
+    menuList: storage.get(MENU_LIST) || []
 };
 
 export default state;

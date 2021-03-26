@@ -8,12 +8,16 @@ const routes: Array<RouteRecordRaw> = [
         name: routeName,
         component: () => import('@/views/transfer/index.vue'),
         redirect: '/system/user',
+        meta: {
+            title: '系统管理'
+        },
         children: [
             {
                 path: 'user',
                 name: `${routeName}-user`,
                 meta: {
-                    title: '用户管理'
+                    title: '用户管理',
+                    isTabsPage: true
                 },
                 component: () =>
                     import(
@@ -24,7 +28,8 @@ const routes: Array<RouteRecordRaw> = [
                 path: 'role',
                 name: `${routeName}-role`,
                 meta: {
-                    title: '角色管理'
+                    title: '角色管理',
+                    isTabsPage: true
                 },
                 component: () =>
                     import(
@@ -35,7 +40,8 @@ const routes: Array<RouteRecordRaw> = [
                 path: 'menu',
                 name: `${routeName}-menu`,
                 meta: {
-                    title: '菜单管理'
+                    title: '菜单管理',
+                    isTabsPage: true
                 },
                 component: () =>
                     import(

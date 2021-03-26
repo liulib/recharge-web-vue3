@@ -1,14 +1,18 @@
 import { isNavigationFailure, Router } from 'vue-router';
-import store from '@/store';
 import NProgress from 'nprogress'; // progress bar
 
 import { storage } from '@/utils/Storage';
 import { whiteList } from '@/configs/base-config';
 import { ACCESS_TOKEN } from '@/store/modules/user/mutation-types';
-import { TOKEN, TAB_LIST } from '@/store/types';
+import { TOKEN, MENU_LIST } from '@/store/types';
+import { useStore } from '@/store';
+
+import { MutationType } from '@/store/modules/menu/mutation-types';
+import { tab } from '@/store/modules/menu/state';
 
 const loginRoutePath = '/login';
 const defaultRoutePath = '/dashboard';
+const store = useStore();
 
 export function createRouterGuards(router: Router) {
     router.beforeEach((to, from, next) => {
@@ -21,6 +25,15 @@ export function createRouterGuards(router: Router) {
                 next({ path: defaultRoutePath });
                 NProgress.done();
             } else {
+                // 判断是否需要添加到tabs标签
+                if (to.meta.isTabsPage) {
+                    const tabsItem: tab = {
+                        name: to.name as string,
+                        title: to.meta.title as string,
+                        path: to.path
+                    };
+                    store.commit(MutationType.ADD_TAB_LIST, tabsItem);
+                }
                 next();
             }
         } else {

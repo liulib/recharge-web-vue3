@@ -1,20 +1,21 @@
 <template>
-    <a-sub-menu :key="menuInfo.path">
+    <a-sub-menu :key="menuInfo.url">
         <template #title>
-            <span>{{ menuInfo.menuTitle }}</span>
+            <span>{{ menuInfo.menuName }}</span>
         </template>
         <template v-for="item in menuInfo.children">
-            <a-menu-item v-if="!item.children" :key="item.path">
-                <span>{{ item.menuTitle }}</span>
+            <a-menu-item v-if="!item.children" :key="item.url">
+                <span>{{ item.menuName }}</span>
             </a-menu-item>
-            <menu-item v-else :key="item.path" :menu-info="item" />
+            <menu-item v-else :key="item.url" :menu-info="item" />
         </template>
     </a-sub-menu>
 </template>
 
 <script lang="ts">
 import { defineComponent, reactive, toRefs } from 'vue';
-interface dataProps {}
+import { useRouter } from 'vue-router';
+
 export default defineComponent({
     name: 'menuItem',
     props: {
@@ -25,10 +26,7 @@ export default defineComponent({
     },
     components: {},
     setup() {
-        const data: dataProps = reactive({});
-        return {
-            ...toRefs(data)
-        };
+        return {};
     }
 });
 </script>

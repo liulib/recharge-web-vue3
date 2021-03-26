@@ -9,7 +9,11 @@ const routes: Array<RouteRecordRaw> = [
         component: () =>
             import(
                 /* webpackChunkName: "dashboard" */ '@/views/dashboard/index.vue'
-            )
+            ),
+        meta: {
+            title: '系统面板',
+            isTabsPage: true
+        }
     }
 ];
 

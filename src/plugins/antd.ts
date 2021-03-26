@@ -12,7 +12,8 @@ import {
     Button,
     Layout,
     Tabs,
-    Dropdown
+    Dropdown,
+    Breadcrumb
 } from 'ant-design-vue';
 
 import 'ant-design-vue/dist/antd.css';
@@ -29,5 +30,6 @@ export function setupAntd(app: App<Element>) {
         .use(Button)
         .use(Layout)
         .use(Dropdown)
-        .use(Tabs);
+        .use(Tabs)
+        .use(Breadcrumb);
 }

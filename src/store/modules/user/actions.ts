@@ -10,9 +10,9 @@ import { LoginReq, LoginRes } from '@/apis/user/types';
 import { UserActionTypes } from './action-types';
 
 import { RootState } from '@/store';
-import { storage } from '@/utils/Storage';
 
-import { TOKEN, TAB_LIST } from '@/store/types';
+import { toTree } from '@/utils/toTree';
+import { Menu } from './state';
 
 type AugmentedActionContext = {
     commit<K extends keyof Mutations>(
@@ -33,12 +33,10 @@ const actions: ActionTree<UserState, RootState> & Actions = {
     async [UserActionTypes.Login]({ commit }, userInfo) {
         try {
             const response = await login(userInfo);
+            const treeData = toTree<Menu>(response.menuList);
 
             commit(MutationType.SET_TOKEN, response.token);
-            commit(MutationType.SET_TAB_LIST, response.menuList);
-
-            storage.set(TOKEN, response.token);
-            storage.set(TAB_LIST, response.menuList);
+            commit(MutationType.SET_MENU_LIST, treeData);
 
             return Promise.resolve(response);
         } catch (e) {
