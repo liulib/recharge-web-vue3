@@ -45,7 +45,7 @@ export function createRouterGuards(router: Router) {
                 // 跳转到登录页并带上跳转前的路径
                 next({
                     path: loginRoutePath,
-                    query: { redirect: to.fullPath },
+                    query: { redirect: to.path },
                     replace: true
                 });
                 NProgress.done();

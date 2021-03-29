@@ -20,16 +20,6 @@ export default defineComponent({
     setup() {
         const route = useRoute();
         const store = useStore();
-
-        const tabsList = computed(() => {
-            return store.state.user.menuList;
-        });
-
-        // console.log(tabsList);
-        // tabsList.value.forEach(item => {
-        //     console.log(item);
-        // });
-
         return {};
     }
 });

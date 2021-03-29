@@ -71,7 +71,7 @@ export default defineComponent({
             rememberFlag: cacheData ? true : false,
             modelRef: cacheData
                 ? cacheData
-                : { username: 'liulib', password: '11111111' },
+                : { username: 'liulib', password: '123456' },
             rulesRef: {
                 username: [
                     {

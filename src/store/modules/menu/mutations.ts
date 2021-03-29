@@ -12,7 +12,7 @@ export interface Mutations<T = MenuState> {
     [MutationType.SET_OPEN_KEYS](state: T, payload: string[]): void;
     [MutationType.SET_SELECTED_KEYS](state: T, payload: string[]): void;
     [MutationType.ADD_TAB_LIST](state: T, payload: tab): void;
-    [MutationType.REMOVE_TAB_LIST](state: T, payload: tab): void;
+    [MutationType.REMOVE_TAB_LIST](state: T, payload: string): void;
     [MutationType.RESET_TAB_LIST](state: T): void;
 }
 
@@ -34,10 +34,8 @@ const mutations: MutationTree<MenuState> & Mutations<MenuState> = {
         }
         storage.set(TAB_LIST, state.tabList);
     },
-    [MutationType.REMOVE_TAB_LIST]: (state, tabItem) => {
-        state.tabList = state.tabList.filter(
-            item => item.path !== tabItem.path
-        );
+    [MutationType.REMOVE_TAB_LIST]: (state, path) => {
+        state.tabList = state.tabList.filter(item => item.path !== path);
         storage.set(TAB_LIST, state.tabList);
     },
     [MutationType.RESET_TAB_LIST]: state => {
