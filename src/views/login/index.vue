@@ -69,9 +69,7 @@ export default defineComponent({
         const state = reactive({
             loading: false,
             rememberFlag: cacheData ? true : false,
-            modelRef: cacheData
-                ? cacheData
-                : { username: 'liulib', password: '123456' },
+            modelRef: cacheData ? cacheData : { username: '', password: '' },
             rulesRef: {
                 username: [
                     {
@@ -97,43 +95,39 @@ export default defineComponent({
          * @description: 点击登录事件
          */
         const handleSubmit = () => {
-            validate()
-                .then(async () => {
-                    // 开启按钮加载动画
-                    state.loading = true;
-                    // 发送action
-                    try {
-                        await store
-                            .dispatch(UserActionTypes.Login, state.modelRef)
-                            .finally(() => {
-                                // 请求完毕关闭加载动画
-                                state.loading = false;
-                            });
-                        message.success('登录成功！');
-
-                        // 如果需要记住密码则将信息存储到localStorage
-                        // TODO:改成加密存储
-                        if (state.rememberFlag) {
-                            storage.set('loginInfo', state.modelRef);
-                        }
-
-                        // 如果是重定向过来的则跳回到之前的页面
-                        const toPath = decodeURIComponent(
-                            (route.query?.redirect || '/') as string
-                        );
-
-                        router.replace(toPath).then(_ => {
-                            if (route.name == 'login') {
-                                router.replace('/');
-                            }
+            validate().then(async () => {
+                // 开启按钮加载动画
+                state.loading = true;
+                // 发送action
+                try {
+                    await store
+                        .dispatch(UserActionTypes.Login, state.modelRef)
+                        .finally(() => {
+                            // 请求完毕关闭加载动画
+                            state.loading = false;
                         });
-                    } catch (error) {
-                        message.error(error.message);
+                    message.success('登录成功！');
+
+                    // 如果需要记住密码则将信息存储到localStorage
+                    // TODO:改成加密存储
+                    if (state.rememberFlag) {
+                        storage.set('loginInfo', state.modelRef);
                     }
-                })
-                .catch(err => {
-                    message.error(err);
-                });
+
+                    // 如果是重定向过来的则跳回到之前的页面
+                    const toPath = decodeURIComponent(
+                        (route.query?.redirect || '/') as string
+                    );
+
+                    router.replace(toPath).then(_ => {
+                        if (route.name == 'login') {
+                            router.replace('/');
+                        }
+                    });
+                } catch (error) {
+                    message.error(error.message);
+                }
+            });
         };
 
         return {

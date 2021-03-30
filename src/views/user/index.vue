@@ -1,73 +1,219 @@
 <template>
     <div class="userContainer">
-        <!-- <a-table :columns="columns" :data-source="userData"> -->
-        <!-- <a slot="name" slot-scope="text">{{ text }}</a>
-            <span slot="customTitle"><a-icon type="smile-o" /> Name</span>
-            <span slot="tags" slot-scope="tags">
-                <a-tag
-                    v-for="tag in tags"
-                    :key="tag"
-                    :color="
-                        tag === 'loser'
-                            ? 'volcano'
-                            : tag.length > 5
-                            ? 'geekblue'
-                            : 'green'
-                    "
+        <a-button type="primary" class="addButton">新增用户</a-button>
+        <a-table
+            :columns="columns"
+            :data-source="userList"
+            :loading="tableLoading"
+            rowKey="id"
+        >
+            <template #status="{ record }">
+                <a-tag v-if="record.status === 0" color="warning">禁用</a-tag>
+                <a-tag v-if="record.status === 1" color="success"
+                    >正常</a-tag
+                ></template
+            >
+            <template #ifManager="{ record }">
+                <a-tag v-if="record.ifManager === 0" color="warning">否</a-tag>
+                <a-tag v-if="record.ifManager === 1" color="success"
+                    >是</a-tag
+                ></template
+            >
+            <template #createdAt="{ text }">
+                {{
+                    TimeFormat.getExpectFormat(text, { isUtc: true })
+                }}</template
+            >
+            <template #updatedAt="{ text }">
+                {{
+                    TimeFormat.getExpectFormat(text, { isUtc: true })
+                }}</template
+            >
+            <template #operation="{ record }">
+                <a-button type="primary" class="operationButton">编辑</a-button
+                ><a-button type="danger" @click="showChangePwdModal(record.id)"
+                    >修改密码</a-button
+                ></template
+            >
+        </a-table>
+        <a-modal
+            v-model:visible="changePwdVisible"
+            title="修改密码"
+            width="300px"
+        >
+            <a-form :model="changePwdPrams">
+                <a-form-item
+                    label="新密码"
+                    v-bind="changeForm.validateInfos.password"
+                    required
+                    has-feedback
                 >
-                    {{ tag.toUpperCase() }}
-                </a-tag>
-            </span>
-            <span slot="action" slot-scope="text, record">
-                <a>Invite 一 {{ record.name }}</a>
-                <a-divider type="vertical" />
-                <a>Delete</a>
-                <a-divider type="vertical" />
-                <a class="ant-dropdown-link">
-                    More actions <a-icon type="down" />
-                </a>
-            </span> -->
-        <!-- </a-table> -->
+                    <a-input
+                        v-model:value="changePwdPrams.password"
+                        props="password"
+                    />
+                </a-form-item>
+            </a-form>
+            <template #footer>
+                <a-button
+                    key="submit"
+                    type="primary"
+                    :loading="confirmChangeLoading"
+                    @click="handleChangeOk"
+                    >确认</a-button
+                >
+            </template>
+        </a-modal>
+        <UserModal
+            :fields=""
+            @closeAddUserModal="closeAddUserModal"
+        ></UserModal>
     </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, reactive, toRefs } from 'vue';
-import { getUserListReq, getUserListRes } from '@/apis/user/types';
-import { getUserList } from '@/apis/user/user';
+import { defineComponent, reactive, toRefs, onMounted } from 'vue';
+import {
+    getUserListReq,
+    getUserListRes,
+    user,
+    changePwdReq
+} from '@/apis/user/types';
+import { getUserList, changePwd } from '@/apis/user/user';
 import { message } from 'ant-design-vue';
+import columns from './userColumns';
+import { TimeFormat } from '@/utils/TimeFormat';
+import { checkPassword } from '@/views/login/validate';
+import { useForm } from '@ant-design-vue/use';
+import { RuleObject } from 'ant-design-vue/es/form/interface';
+import UserModal from './UserModal.vue';
+
+interface changeRules {
+    password: [
+        {
+            validator: (rule: RuleObject, value: string) => Promise<void>;
+            trigger: string;
+        }
+    ];
+}
 
 interface dataProps {
-    userData: getUserListRes | null;
+    resData: getUserListRes | null;
     reqParams: getUserListReq;
+    userList: user[];
+    changePwdVisible: boolean;
+    changePwdPrams: changePwdReq;
+    changeRules: changeRules;
+    confirmChangeLoading: boolean;
+    tableLoading: boolean;
 }
 
 export default defineComponent({
     name: 'User',
-    components: {},
+    components: { UserModal },
     setup() {
         const state: dataProps = reactive({
-            userData: null,
+            resData: null,
             reqParams: {
                 pageSize: 5,
                 pageNumber: 1
-            }
+            },
+            userList: [],
+            changePwdVisible: false,
+            changePwdPrams: { id: 0, password: '' },
+            changeRules: {
+                password: [
+                    {
+                        validator: checkPassword,
+                        trigger: 'blur'
+                    }
+                ]
+            },
+            tableLoading: false,
+            confirmChangeLoading: false
         });
-        const getData = async () => {
+
+        const changeForm = useForm(state.changePwdPrams, state.changeRules);
+
+        const showChangePwdModal = id => {
+            state.changePwdPrams.id = id;
+            state.changePwdVisible = true;
+        };
+
+        const handleChangeOk = () => {
+            changeForm.validate().then(async () => {
+                await changePwdReq().finally(() => {
+                    // 关闭对话框
+                    state.changePwdVisible = false;
+                    // 清空表单
+                    changeForm.resetFields();
+                });
+            });
+        };
+
+        const changePwdReq = async () => {
             try {
-                const userData = await getUserList(state.reqParams);
-                console.log(userData);
+                // 开启按钮加载
+                state.confirmChangeLoading = true;
+                // 请求
+                const res = await changePwd(state.changePwdPrams);
+                // 关闭按钮加载
+                state.confirmChangeLoading = false;
+                // 判断结果 提示
+                if (res.code === 1) {
+                    message.success('修改成功');
+                    // 请求新数据
+                    getUserListReq();
+                } else {
+                    message.error(res.message);
+                }
             } catch (error) {
                 message.error(error);
             }
         };
-        getData();
+
+        const getUserListReq = async () => {
+            try {
+                // 开启表格加载
+                state.tableLoading = true;
+                state.resData = await getUserList(state.reqParams);
+                state.userList = state.resData.list;
+                // 关闭表格加载
+                state.tableLoading = false;
+            } catch (error) {
+                message.error(error);
+            }
+        };
+
+        const closeAddUserModal = () => {
+            console.log('closeAddUserModal');
+        };
+
+        onMounted(() => {
+            getUserListReq();
+        });
+
         return {
-            ...toRefs(state)
+            ...toRefs(state),
+            columns,
+            TimeFormat,
+            changePwd,
+            showChangePwdModal,
+            handleChangeOk,
+            changeForm,
+            closeAddUserModal
         };
     }
 });
 </script>
 
-<style lang="" scoped>
+<style lang="less" scoped>
+.userContainer {
+    .addButton {
+        margin-bottom: 20px;
+    }
+    .operationButton {
+        margin-right: 10px;
+    }
+}
 </style>

@@ -43,3 +43,8 @@ export interface getUserListRes {
     pageNum: number;
     pageSize: number;
 }
+
+export interface changePwdReq {
+    id: number;
+    password: string;
+}
