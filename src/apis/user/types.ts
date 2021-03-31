@@ -26,7 +26,6 @@ export interface getUserListReq {
 export interface user {
     id: number;
     username: string;
-    password: string;
     email?: string;
     mobile?: string;
     ifManager: number;
@@ -35,6 +34,7 @@ export interface user {
     isDelete: number;
     createdAt: string;
     updatedAt: string;
+    roles: any[];
 }
 
 export interface getUserListRes {
@@ -47,4 +47,27 @@ export interface getUserListRes {
 export interface changePwdReq {
     id: number;
     password: string;
+}
+
+export interface createUserReq {
+    username: string;
+    password: string;
+    roles?: string;
+    email?: string;
+    mobile?: string;
+    ifManager: number;
+    status: number;
+    remark?: string;
+    isDelete: number;
+}
+
+export interface updateUserReq {
+    id: number;
+    email?: string;
+    mobile?: string;
+    ifManager: number;
+    status: number;
+    remark?: string;
+    isDelete: number;
+    roles?: string;
 }

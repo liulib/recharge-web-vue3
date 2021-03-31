@@ -1,6 +1,8 @@
 <template>
     <div class="userContainer">
-        <a-button type="primary" class="addButton">新增用户</a-button>
+        <a-button type="primary" class="addButton" @click="showAddUserModal(0)"
+            >新增用户</a-button
+        >
         <a-table
             :columns="columns"
             :data-source="userList"
@@ -30,7 +32,11 @@
                 }}</template
             >
             <template #operation="{ record }">
-                <a-button type="primary" class="operationButton">编辑</a-button
+                <a-button
+                    type="primary"
+                    @click="showAddUserModal(1, record)"
+                    class="operationButton"
+                    >编辑</a-button
                 ><a-button type="danger" @click="showChangePwdModal(record.id)"
                     >修改密码</a-button
                 ></template
@@ -65,7 +71,8 @@
             </template>
         </a-modal>
         <UserModal
-            :fields=""
+            v-if="addUserVisible"
+            :fields="addUserParams"
             @closeAddUserModal="closeAddUserModal"
         ></UserModal>
     </div>
@@ -88,13 +95,26 @@ import { useForm } from '@ant-design-vue/use';
 import { RuleObject } from 'ant-design-vue/es/form/interface';
 import UserModal from './UserModal.vue';
 
-interface changeRules {
+export interface changeRules {
     password: [
         {
             validator: (rule: RuleObject, value: string) => Promise<void>;
             trigger: string;
         }
     ];
+}
+
+export interface addUserProps {
+    id?: number;
+    username: string;
+    password: string;
+    email?: string;
+    mobile?: string;
+    ifManager?: number;
+    status?: number;
+    remark?: string;
+    isDelete?: number;
+    roles?: string;
 }
 
 interface dataProps {
@@ -106,6 +126,8 @@ interface dataProps {
     changeRules: changeRules;
     confirmChangeLoading: boolean;
     tableLoading: boolean;
+    addUserParams: addUserProps;
+    addUserVisible: boolean;
 }
 
 export default defineComponent({
@@ -130,7 +152,20 @@ export default defineComponent({
                 ]
             },
             tableLoading: false,
-            confirmChangeLoading: false
+            confirmChangeLoading: false,
+            addUserParams: {
+                id: 0,
+                username: '',
+                password: '',
+                email: '',
+                mobile: '',
+                ifManager: 0,
+                status: 1,
+                remark: '',
+                isDelete: 0,
+                roles: ''
+            },
+            addUserVisible: false
         });
 
         const changeForm = useForm(state.changePwdPrams, state.changeRules);
@@ -186,7 +221,42 @@ export default defineComponent({
         };
 
         const closeAddUserModal = () => {
-            console.log('closeAddUserModal');
+            // 关闭对话框
+            state.addUserVisible = false;
+            // 请求最新数据
+            getUserListReq();
+        };
+
+        const showAddUserModal = (type: number, editData: user) => {
+            // 处理数据
+            if (type) {
+                for (let item in editData) {
+                    if (item === 'roles') {
+                        state.addUserParams[item] = editData[item]
+                            .map(element => {
+                                return element.id;
+                            })
+                            .join(',');
+                    } else {
+                        state.addUserParams[item] = editData[item];
+                    }
+                }
+            } else {
+                state.addUserParams = {
+                    id: 0,
+                    username: '',
+                    password: '',
+                    email: '',
+                    mobile: '',
+                    ifManager: 0,
+                    status: 1,
+                    remark: '',
+                    isDelete: 0,
+                    roles: ''
+                };
+            }
+            // 显示对话框
+            state.addUserVisible = true;
         };
 
         onMounted(() => {
@@ -201,7 +271,8 @@ export default defineComponent({
             showChangePwdModal,
             handleChangeOk,
             changeForm,
-            closeAddUserModal
+            closeAddUserModal,
+            showAddUserModal
         };
     }
 });

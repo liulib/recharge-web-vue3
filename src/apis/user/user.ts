@@ -4,13 +4,16 @@ import {
     LoginRes,
     getUserListReq,
     getUserListRes,
-    changePwdReq
+    changePwdReq,
+    createUserReq,
+    updateUserReq
 } from './types';
 
 enum Api {
     login = '/auth/login',
     logout = '/auth/logout',
     createUser = '/user',
+    updateUser = '/user/updateUser',
     changePwd = '/user/changePwd',
     getUserList = '/user/getUserList',
     deployRole = '/user/deployRole'
@@ -45,6 +48,34 @@ export function changePwd(params: changePwdReq) {
     return http.request(
         {
             url: Api.changePwd,
+            method: 'POST',
+            params
+        },
+        { isTransformRequestResult: false }
+    );
+}
+
+/**
+ * @description: 创建用户
+ */
+export function createUser(params: any) {
+    return http.request(
+        {
+            url: Api.createUser,
+            method: 'POST',
+            params
+        },
+        { isTransformRequestResult: false }
+    );
+}
+
+/**
+ * @description: 修改用户
+ */
+export function updateUser(params: any) {
+    return http.request(
+        {
+            url: Api.updateUser,
             method: 'POST',
             params
         },

@@ -1,36 +1,117 @@
 <template>
     <div class="userModalContainer">
         <a-modal
-            v-model:visible="addUserModalVisible"
-            title="新增用户"
-            width="300px"
+            v-model:visible="addUserVisible"
+            @cancel="handleAddClose"
+            :title="fields.id === 0 ? '新增用户' : '编辑用户'"
+            width="400px"
         >
-            <a-form :model="addUserModalParams">
+            <a-form
+                :model="addUserParams"
+                :label-col="labelCol"
+                :wrapper-col="wrapperCol"
+            >
                 <a-form-item
                     label="用户名"
-                    v-bind="changeForm.validateInfos.password"
+                    v-bind="addForm.validateInfos.username"
                     required
                     has-feedback
                 >
                     <a-input
-                        v-model:value="changePwdPrams.password"
-                        props="password"
+                        :disabled="fields.id !== 0"
+                        v-model:value="addUserParams.username"
+                        props="username"
                     />
                 </a-form-item>
-            </a-form>
-            <a-form :model="addUserModalPrams">
                 <a-form-item
+                    v-if="fields.id === 0"
                     label="密码"
-                    v-bind="changeForm.validateInfos.password"
+                    v-bind="addForm.validateInfos.password"
                     required
                     has-feedback
                 >
                     <a-input
-                        v-model:value="changePwdPrams.password"
+                        v-model:value="addUserParams.password"
                         props="password"
                     />
                 </a-form-item>
+                <a-form-item
+                    label="手机号"
+                    v-bind="addForm.validateInfos.mobile"
+                >
+                    <a-input
+                        v-model:value="addUserParams.mobile"
+                        props="mobile"
+                    />
+                </a-form-item>
+                <a-form-item label="邮箱" v-bind="addForm.validateInfos.email">
+                    <a-input
+                        v-model:value="addUserParams.email"
+                        props="email"
+                    />
+                </a-form-item>
+                <a-form-item
+                    label="是否管理员"
+                    v-bind="addForm.validateInfos.ifManager"
+                    required
+                >
+                    <a-radio-group
+                        name="ifManagerRadioGroup"
+                        v-model:value="addUserParams.ifManager"
+                    >
+                        <a-radio :value="1">是</a-radio>
+                        <a-radio :value="0">否</a-radio>
+                    </a-radio-group>
+                </a-form-item>
+                <a-form-item
+                    label="状态"
+                    v-bind="addForm.validateInfos.status"
+                    required
+                >
+                    <a-radio-group
+                        name="statusRadioGroup"
+                        v-model:value="addUserParams.status"
+                    >
+                        <a-radio :value="1">正常</a-radio>
+                        <a-radio :value="0">禁用</a-radio>
+                    </a-radio-group>
+                </a-form-item>
+                <a-form-item label="备注" v-bind="addForm.validateInfos.remark">
+                    <a-input
+                        v-model:value="addUserParams.remark"
+                        props="email"
+                    />
+                </a-form-item>
+                <a-form-item
+                    label="是否删除"
+                    v-bind="addForm.validateInfos.isDelete"
+                    required
+                >
+                    <a-radio-group
+                        name="isDeleteRadioGroup"
+                        v-model:value="addUserParams.isDelete"
+                    >
+                        <a-radio :value="1">是</a-radio>
+                        <a-radio :value="0">否</a-radio>
+                    </a-radio-group>
+                </a-form-item>
+                <a-form-item label="角色" v-bind="addForm.validateInfos.roles">
+                    <a-select
+                        mode="multiple"
+                        v-model:value="selectRoleList"
+                        placeholder="请选择角色"
+                        @change="handleChange"
+                    >
+                        <a-select-option
+                            v-for="item in roleList"
+                            :value="item.id"
+                            :key="item.id"
+                            >{{ item.roleName }}</a-select-option
+                        >
+                    </a-select>
+                </a-form-item>
             </a-form>
+
             <template #footer>
                 <a-button
                     key="submit"
@@ -45,24 +126,24 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, reactive, toRefs } from 'vue';
-
-interface addUserProps {
-    id?: number;
-    username: string;
-    password: string;
-    email?: string;
-    mobile?: string;
-    ifManager?: number;
-    status?: number;
-    remark?: string;
-    isDelete?: number;
-}
+import { defineComponent, reactive, toRefs, onMounted, watch } from 'vue';
+import { useForm } from '@ant-design-vue/use';
+import { addUserProps } from './index.vue';
+import { checkUsername } from '@/views/login/validate';
+import { getRoleAll } from '@/apis/role/index';
+import { getRoleAllRes } from '@/apis/role/types';
+import { createUser, updateUser } from '@/apis/user/user';
+import { message } from 'ant-design-vue';
+import { updateUserReq } from '@/apis/user/types';
 
 interface dataProps {
     confirmAddLoading: boolean;
     addUserParams: addUserProps;
+    addRules: any;
+    roleList: getRoleAllRes[];
+    selectRoleList: string[];
 }
+
 export default defineComponent({
     name: 'UserModal',
     props: {
@@ -71,7 +152,7 @@ export default defineComponent({
             default: () => ({})
         }
     },
-    setup(props) {
+    setup(props, { emit }) {
         const data: dataProps = reactive({
             confirmAddLoading: false,
             addUserParams: {
@@ -81,21 +162,131 @@ export default defineComponent({
                 email: '',
                 mobile: '',
                 ifManager: 0,
-                status: 0,
+                status: 1,
                 remark: '',
                 isDelete: 0
-            }
+            },
+            addRules: {
+                username: [
+                    {
+                        validator: checkUsername,
+                        trigger: 'blur'
+                    }
+                ],
+                status: [
+                    {
+                        type: 'number',
+                        required: true,
+                        message: '请选择状态',
+                        trigger: 'blur'
+                    }
+                ],
+                ifManager: [
+                    {
+                        type: 'number',
+                        required: true,
+                        message: '请选择是否管理员',
+                        trigger: 'blur'
+                    }
+                ],
+                isDelete: [
+                    {
+                        type: 'number',
+                        required: true,
+                        message: '请选择是否删除',
+                        trigger: 'blur'
+                    }
+                ]
+            },
+            addUserVisible: true,
+            roleList: [],
+            selectRoleList: []
         });
+
+        data.selectRoleList = ['admin'];
+
+        // 有id,则为编辑操作
+        if (props.fields.id) {
+            Object.keys(data.addUserParams).forEach(
+                key => (data.addUserParams[key] = props.fields[key])
+            );
+        }
+
+        const addForm = useForm(data.addUserParams, data.addRules);
+
         const handleAddOk = () => {
-            console.log('Ok');
+            addForm
+                .validate()
+                .then(async () => {
+                    //开启加载动画
+                    data.confirmAddLoading = true;
+                    try {
+                        if (props.fields.id) {
+                            // 更新
+                            const {
+                                username,
+                                password,
+                                ...others
+                            } = data.addUserParams;
+                            const res = await updateUser(others);
+                            if (res.code === 1) {
+                                message.success(res.message);
+                            } else {
+                                message.error(res.message);
+                            }
+                        } else {
+                            // 创建
+                            const { id, ...others } = data.addUserParams;
+                            const res = await createUser(others);
+                            if (res.code === 1) {
+                                message.success(res.message);
+                            } else {
+                                message.error(res.message);
+                            }
+                        }
+                    } catch (error) {
+                        message.error(error);
+                    }
+                })
+                .finally(() => {
+                    // 关闭加载动画
+                    data.confirmAddLoading = false;
+                    // 关闭对话框
+                    emit('closeAddUserModal');
+                });
         };
-        const handleAddCancel = () => {
-            console.log('Cancel');
+
+        const handleAddClose = () => {
+            emit('closeAddUserModal');
         };
+
+        const handleChange = (value: string[]) => {
+            data.addUserParams.roles = value.join(',');
+            console.log(data.addUserParams.roles);
+        };
+        /**
+         * @description: 获取全部角色列表
+         */
+        const getRoleAllReq = async () => {
+            try {
+                data.roleList = await getRoleAll();
+            } catch (error) {
+                message.error(error);
+            }
+        };
+
+        onMounted(() => {
+            getRoleAllReq();
+        });
+
         return {
             ...toRefs(data),
             handleAddOk,
-            handleAddCancel
+            handleAddClose,
+            addForm,
+            handleChange,
+            wrapperCol: { span: 15, offset: 3 },
+            labelCol: { span: 6 }
         };
     }
 });
