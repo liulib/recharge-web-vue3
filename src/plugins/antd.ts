@@ -15,7 +15,8 @@ import {
     Dropdown,
     Breadcrumb,
     Tag,
-    Select
+    Select,
+    Tree
 } from 'ant-design-vue';
 
 import 'ant-design-vue/dist/antd.css';
@@ -35,5 +36,6 @@ export function setupAntd(app: App<Element>) {
         .use(Tabs)
         .use(Breadcrumb)
         .use(Tag)
-        .use(Select);
+        .use(Select)
+        .use(Tree);
 }

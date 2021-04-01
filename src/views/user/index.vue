@@ -7,6 +7,8 @@
             :columns="columns"
             :data-source="userList"
             :loading="tableLoading"
+            :pagination="pagination"
+            @change="handlePageChange"
             rowKey="id"
         >
             <template #status="{ record }">
@@ -128,6 +130,7 @@ interface dataProps {
     tableLoading: boolean;
     addUserParams: addUserProps;
     addUserVisible: boolean;
+    pagination: any;
 }
 
 export default defineComponent({
@@ -137,7 +140,7 @@ export default defineComponent({
         const state: dataProps = reactive({
             resData: null,
             reqParams: {
-                pageSize: 5,
+                pageSize: 10,
                 pageNumber: 1
             },
             userList: [],
@@ -165,7 +168,15 @@ export default defineComponent({
                 isDelete: 0,
                 roles: ''
             },
-            addUserVisible: false
+            addUserVisible: false,
+            // 分页属性
+            pagination: {
+                current: 1,
+                pageSize: 10,
+                showQuickJumper: true,
+                total: 0,
+                showTotal: total => `共 ${total} 条`
+            }
         });
 
         const changeForm = useForm(state.changePwdPrams, state.changeRules);
@@ -211,12 +222,19 @@ export default defineComponent({
             try {
                 // 开启表格加载
                 state.tableLoading = true;
+                // 赋值分页
+                state.reqParams.pageNumber = state.pagination.current;
+                state.reqParams.pageSize = state.pagination.pageSize;
+                //请求
                 state.resData = await getUserList(state.reqParams);
                 state.userList = state.resData.list;
+                state.pagination.total = state.resData.total;
                 // 关闭表格加载
                 state.tableLoading = false;
             } catch (error) {
                 message.error(error);
+                // 关闭表格加载
+                state.tableLoading = false;
             }
         };
 
@@ -259,6 +277,11 @@ export default defineComponent({
             state.addUserVisible = true;
         };
 
+        const handlePageChange = data => {
+            state.pagination = data;
+            getUserListReq();
+        };
+
         onMounted(() => {
             getUserListReq();
         });
@@ -272,7 +295,8 @@ export default defineComponent({
             handleChangeOk,
             changeForm,
             closeAddUserModal,
-            showAddUserModal
+            showAddUserModal,
+            handlePageChange
         };
     }
 });

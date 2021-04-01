@@ -128,11 +128,7 @@ const transform: AxiosTransform = {
             isParseToJson
         } = options;
 
-        console.log(apiUrl);
-
         config.url = apiUrl ? apiUrl + config.url : config.url;
-
-        console.log(config.url);
 
         if (config.method === RequestEnum.GET) {
             const now = new Date().getTime();
@@ -231,19 +227,21 @@ const Axios = new VAxios({
     // baseURL: globSetting.apiUrl,
     // 接口可能会有通用的地址部分，可以统一抽取出来
     // prefixUrl: prefix,
-    headers: { 'Content-Type': ContentTypeEnum.FORM_URLENCODED },
+    headers: { 'Content-Type': ContentTypeEnum.JSON },
     // 数据处理方式
     transform,
     // 配置项，下面的选项都可以在独立的接口请求中覆盖
     requestOptions: {
         // 默认将prefix 添加到url
-        joinPrefix: true,
+        joinPrefix: false,
         // 需要对返回数据进行处理
         isTransformRequestResult: true,
         // post请求的时候添加参数到url
         joinParamsToUrl: false,
         // 格式化提交参数时间
         formatDate: true,
+        // 转换成json
+        isParseToJson: true,
         // 消息提示类型
         errorMessageMode: 'none',
         // 接口地址

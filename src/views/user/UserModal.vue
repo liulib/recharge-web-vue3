@@ -98,8 +98,8 @@
                 <a-form-item label="角色" v-bind="addForm.validateInfos.roles">
                     <a-select
                         mode="multiple"
-                        v-model:value="selectRoleList"
                         placeholder="请选择角色"
+                        :default-value="selectRoleList"
                         @change="handleChange"
                     >
                         <a-select-option
@@ -131,7 +131,7 @@ import { useForm } from '@ant-design-vue/use';
 import { addUserProps } from './index.vue';
 import { checkUsername } from '@/views/login/validate';
 import { getRoleAll } from '@/apis/role/index';
-import { getRoleAllRes } from '@/apis/role/types';
+import { role } from '@/apis/role/types';
 import { createUser, updateUser } from '@/apis/user/user';
 import { message } from 'ant-design-vue';
 import { updateUserReq } from '@/apis/user/types';
@@ -139,9 +139,10 @@ import { updateUserReq } from '@/apis/user/types';
 interface dataProps {
     confirmAddLoading: boolean;
     addUserParams: addUserProps;
+    addUserVisible: boolean;
     addRules: any;
-    roleList: getRoleAllRes[];
-    selectRoleList: string[];
+    roleList: role[];
+    selectRoleList: number[];
 }
 
 export default defineComponent({
@@ -164,7 +165,8 @@ export default defineComponent({
                 ifManager: 0,
                 status: 1,
                 remark: '',
-                isDelete: 0
+                isDelete: 0,
+                roles: ''
             },
             addRules: {
                 username: [
@@ -203,7 +205,19 @@ export default defineComponent({
             selectRoleList: []
         });
 
-        data.selectRoleList = ['admin'];
+        // 默认值用于回显用户之前的角色
+        if (
+            props.fields.roles !== undefined &&
+            props.fields.roles.replace(/(^\s*)|(\s*$)/g, '') !== ''
+        ) {
+            data.selectRoleList = props.fields.roles
+                .split(',')
+                .map(item => Number(item));
+            // 没有触发change事件的时候需要有默认值不然就会被赋值成''
+            data.addUserParams.roles = JSON.parse(
+                JSON.stringify(props.fields.roles)
+            );
+        }
 
         // 有id,则为编辑操作
         if (props.fields.id) {
@@ -262,7 +276,6 @@ export default defineComponent({
 
         const handleChange = (value: string[]) => {
             data.addUserParams.roles = value.join(',');
-            console.log(data.addUserParams.roles);
         };
         /**
          * @description: 获取全部角色列表

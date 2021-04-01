@@ -14,7 +14,7 @@ export interface Menu {
     createdAt: string;
     updatedAt: string;
     level: number;
-    children?: object;
+    children?: Menu[];
 }
 
 export interface UserState {
