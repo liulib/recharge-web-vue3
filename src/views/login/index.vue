@@ -2,9 +2,9 @@
     <div class="loginBox">
         <h1 class="logo">LOGO</h1>
         <a-form class="formBox" :wrapper-col="wrapperCol" :model="modelRef">
-            <a-form-item v-bind="validateInfos.username">
+            <a-form-item v-bind="validateInfos.account">
                 <a-input
-                    v-model:value="modelRef.username"
+                    v-model:value="modelRef.account"
                     placeholder="Username"
                 >
                 </a-input>
@@ -64,14 +64,14 @@ export default defineComponent({
         const store = useStore();
 
         // 获取localStorage中的登录信息
-        const cacheData: LoginReq = storage.get('loginInfo');
+        const cacheData: LoginReq = JSON.parse(storage.getCookie('loginInfo'));
 
         const state = reactive({
             loading: false,
             rememberFlag: cacheData ? true : false,
-            modelRef: cacheData ? cacheData : { username: '', password: '' },
+            modelRef: cacheData ? cacheData : { account: '', password: '' },
             rulesRef: {
-                username: [
+                account: [
                     {
                         validator: checkUsername,
                         trigger: 'blur'
@@ -111,7 +111,10 @@ export default defineComponent({
                     // 如果需要记住密码则将信息存储到localStorage
                     // TODO:改成加密存储
                     if (state.rememberFlag) {
-                        storage.set('loginInfo', state.modelRef);
+                        storage.setCookie(
+                            'loginInfo',
+                            JSON.stringify(state.modelRef)
+                        );
                     }
 
                     // 如果是重定向过来的则跳回到之前的页面

@@ -11,7 +11,12 @@ export default [
         key: 'id'
     },
     {
-        title: '用户账户',
+        title: '用户账号',
+        dataIndex: 'account',
+        key: 'account'
+    },
+    {
+        title: '用户名',
         dataIndex: 'username',
         key: 'username'
     },

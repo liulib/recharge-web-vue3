@@ -120,5 +120,5 @@ export default defineComponent({
 });
 </script>
 
-<style lang="" scoped>
+<style lang="less" scoped>
 </style>

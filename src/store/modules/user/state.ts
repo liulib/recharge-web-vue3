@@ -1,4 +1,4 @@
-import { TOKEN, MENU_LIST } from '@/store/types';
+import { TOKEN, MENU_LIST, USER_NAME } from '@/store/types';
 import { storage } from '@/utils/Storage';
 
 export interface Menu {
@@ -18,13 +18,15 @@ export interface Menu {
 }
 
 export interface UserState {
+    username: string;
     token: string;
     menuList: Menu[];
 }
 
 const state: UserState = {
     token: storage.get(TOKEN) || '',
-    menuList: storage.get(MENU_LIST) || []
+    menuList: storage.get(MENU_LIST) || [],
+    username: storage.get(USER_NAME) || ''
 };
 
 export default state;

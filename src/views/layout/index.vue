@@ -1,10 +1,11 @@
 <template>
     <a-layout class="layoutBox">
-        <LayoutHeader></LayoutHeader>
+        <a-layout-sider class="layoutSider"
+            ><LayoutMenu></LayoutMenu
+        ></a-layout-sider>
+
         <a-layout>
-            <a-layout-sider class="layoutSider"
-                ><LayoutMenu></LayoutMenu
-            ></a-layout-sider>
+            <LayoutHeader></LayoutHeader>
             <a-layout-content><LayoutContent></LayoutContent></a-layout-content>
         </a-layout>
     </a-layout>
@@ -35,9 +36,8 @@ export default defineComponent({
     position: absolute;
     top: 0;
     bottom: 0;
-    background-color: skyblue;
     .layoutSider {
-        background-color: #fff;
+        // background-color: #fff;
     }
 }
 </style>

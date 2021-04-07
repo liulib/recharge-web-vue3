@@ -21,20 +21,26 @@ export function getMenuAll() {
  * @description: 创建菜单
  */
 export function createMenu(params: createMenuReq) {
-    return http.request({
-        url: Api.getMenuAll,
-        method: 'POST',
-        params
-    });
+    return http.request(
+        {
+            url: Api.createMenu,
+            method: 'POST',
+            params
+        },
+        { isTransformRequestResult: false }
+    );
 }
 
 /**
  * @description: 更新菜单
  */
 export function updateById(params) {
-    return http.request({
-        url: Api.updateById,
-        method: 'POST',
-        params
-    });
+    return http.request(
+        {
+            url: Api.updateById,
+            method: 'POST',
+            params
+        },
+        { isTransformRequestResult: false }
+    );
 }

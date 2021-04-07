@@ -4,7 +4,7 @@
             <span>{{ menuInfo.menuName }}</span>
         </template>
         <template v-for="item in menuInfo.children">
-            <a-menu-item v-if="!item.children" :key="item.url">
+            <a-menu-item v-if="item.level < 3" :key="item.url">
                 <span>{{ item.menuName }}</span>
             </a-menu-item>
             <menu-item v-else :key="item.url" :menu-info="item" />

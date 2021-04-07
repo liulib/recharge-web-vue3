@@ -12,13 +12,24 @@
                 :wrapper-col="wrapperCol"
             >
                 <a-form-item
+                    label="用户账号"
+                    v-bind="addForm.validateInfos.account"
+                    required
+                    has-feedback
+                >
+                    <a-input
+                        :disabled="fields.id !== 0"
+                        v-model:value="addUserParams.account"
+                        props="account"
+                    />
+                </a-form-item>
+                <a-form-item
                     label="用户名"
                     v-bind="addForm.validateInfos.username"
                     required
                     has-feedback
                 >
                     <a-input
-                        :disabled="fields.id !== 0"
                         v-model:value="addUserParams.username"
                         props="username"
                     />
@@ -79,7 +90,7 @@
                 <a-form-item label="备注" v-bind="addForm.validateInfos.remark">
                     <a-input
                         v-model:value="addUserParams.remark"
-                        props="email"
+                        props="remark"
                     />
                 </a-form-item>
                 <a-form-item
@@ -159,6 +170,7 @@ export default defineComponent({
             addUserParams: {
                 id: 0,
                 username: '',
+                account: '',
                 password: '',
                 email: '',
                 mobile: '',
@@ -169,6 +181,12 @@ export default defineComponent({
                 roles: ''
             },
             addRules: {
+                account: [
+                    {
+                        validator: checkUsername,
+                        trigger: 'blur'
+                    }
+                ],
                 username: [
                     {
                         validator: checkUsername,
@@ -238,7 +256,7 @@ export default defineComponent({
                         if (props.fields.id) {
                             // 更新
                             const {
-                                username,
+                                account,
                                 password,
                                 ...others
                             } = data.addUserParams;

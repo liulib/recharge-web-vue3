@@ -5,7 +5,7 @@ export default [
         key: 'id'
     },
     {
-        title: '菜单名称',
+        title: '菜单名',
         dataIndex: 'menuName',
         key: 'menuName'
     },
@@ -65,6 +65,6 @@ export default [
         key: 'operation',
         dataIndex: 'operation',
         slots: { customRender: 'operation' },
-        width: '200px'
+        width: '250px'
     }
 ];

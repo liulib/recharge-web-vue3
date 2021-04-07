@@ -37,6 +37,7 @@ const actions: ActionTree<UserState, RootState> & Actions = {
 
             commit(MutationType.SET_TOKEN, response.token);
             commit(MutationType.SET_MENU_LIST, treeData);
+            commit(MutationType.SET_USER_NAME, response.username);
 
             return Promise.resolve(response);
         } catch (e) {

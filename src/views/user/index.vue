@@ -110,6 +110,7 @@ export interface addUserProps {
     id?: number;
     username: string;
     password: string;
+    account: string;
     email?: string;
     mobile?: string;
     ifManager?: number;
@@ -159,6 +160,7 @@ export default defineComponent({
             addUserParams: {
                 id: 0,
                 username: '',
+                account: '',
                 password: '',
                 email: '',
                 mobile: '',
@@ -263,6 +265,7 @@ export default defineComponent({
                 state.addUserParams = {
                     id: 0,
                     username: '',
+                    account: '',
                     password: '',
                     email: '',
                     mobile: '',

@@ -4,7 +4,7 @@
  * @param {String} name 选填|name对应的属性，默认为name（比如用户列表里为userName）
  */
 export const parseParent = function (data, name = 'name') {
-    var tmp = {};
+    const tmp = {};
     for (let i = 0; i < data.length; i++) {
         tmp[data[i].id] = data[i][name];
     }

@@ -2,10 +2,10 @@ import { RuleObject } from 'ant-design-vue/es/form/interface';
 
 export const checkUsername = async (rule: RuleObject, value: string) => {
     if (!value) {
-        return Promise.reject('请输入用户名');
+        return Promise.reject('请输入用户账号');
     } else {
         if (value.length < 6 || value.length > 20) {
-            return Promise.reject('用户名长度为6-20位');
+            return Promise.reject('用户账号长度为6-20位');
         } else {
             return Promise.resolve();
         }
